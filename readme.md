@@ -16,7 +16,8 @@ apply_filters( 'auto_summary_score_minimum', 'edit_summary_score_minimum' ); // 
 Example Summary
 ---------------
 
-###Original Post
+### Original Post
+
 https://wordpress.org/news/2017/05/wordpress-now-on-hackerone/
 
 ### Summary With the Default Settings
