@@ -1,0 +1,9 @@
+{
+	"version": 3,
+	"file": "auto-summary.css",
+	"sources": [
+		"sass/auto-summary.scss"
+	],
+	"mappings": "AAAA,AACC,4BAD2B,CAC3B,QAAQ,CAAC;EACR,OAAO,EAAE,KAAM;EACf,MAAM,EAAE,QAAS;EACjB,MAAM,EAAE,GAAI;EACZ,KAAK,EAAE,IAAK;EACZ,QAAQ,EAAE,MAAO,GACjB",
+	"names": []
+}

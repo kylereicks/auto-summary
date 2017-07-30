@@ -1,0 +1,6 @@
+#auto-summary-view-container textarea {
+  display: block;
+  margin: 12px 0 0;
+  height: 4em;
+  width: 100%;
+  overflow: hidden; }
