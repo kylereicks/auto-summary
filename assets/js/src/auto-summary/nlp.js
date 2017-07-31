@@ -86,7 +86,6 @@ export function getTopSentences( text ) {
 		let data = {
 			index: sentenceIndex,
 			text: sentence.out( 'text' ).trim(),
-			data: sentence,
 			wordCount: sentence.terms.length,
 			topTokenCount: 0,
 			topTokenDensity: 0,
@@ -101,7 +100,15 @@ export function getTopSentences( text ) {
 	} );
 
 	// Return sentences that meet the score minimum in chronological order.
-	return sentenceData.filter( function( sentence ){ let keep = sentence.score >= scoreMinimum && remainingWords > 0; remainingWords -= keep ? sentence.wordCount : 0; return keep; } ).sort( function( a, b ) { return a.index - b.index; } );
+	return sentenceData.sort( function( a, b ) {
+		return b.score - a.score;
+	} ).filter( function( sentence ){
+		let keep = sentence.score >= scoreMinimum && remainingWords > 0;
+		remainingWords -= keep ? sentence.wordCount : 0;
+		return keep;
+	} ).sort( function( a, b ) {
+		return a.index - b.index;
+	} );
 };
 
 /**
