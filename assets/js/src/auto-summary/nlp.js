@@ -1,3 +1,4 @@
+'use strict'
 /**
  * @summary Functions to parse text and return sentences that summarize the content.
  *
@@ -21,7 +22,7 @@ import compromise from '../vendor/compromise';
  * @param {string} text A text string to parse.
  * @returns {array} An array of sentence data objects.
  */
-export function getTopSentences( text ) {
+export function getTopSentences( text, _settings ) {
 
 	// Parse the text.
 	const parsedText = compromise( text ),
@@ -31,36 +32,35 @@ export function getTopSentences( text ) {
 	allWords = Array.from( new Set( words.out( 'array' ) ) ),
 
 	// Settings.
-	scoreMinimum = window.autoSummarySettings.scoreMinimum || 1,
-	excerptLength = window.autoSummarySettings.excerptLength || 55,
-	stopWords = window.autoSummarySettings.stopWords || [],
-
-	// Word and Sentence data.
-	wordData = {},
-	sentenceData = [];
-
-	// Top tokens. Including words and three word "grams".
-	let topTokens = null,
-
-	// The number of words left to reach the summary limit.
-	remainingWords = excerptLength;
+	settings = _settings || {},
+	scoreMinimum = settings.scoreMinimum || window.autoSummarySettings.scoreMinimum || 1,
+	excerptLength = settings.excerptLength || window.autoSummarySettings.excerptLength || 55,
+	stopWords = settings.stopWords || window.autoSummarySettings.stopWords || [],
 
 	// Setup word data for nouns, verbs, adjectives, and "values".
-	words.list.forEach( function( term ) {
+	wordData = words.list.reduce( function( dataObject, term ) {
 		if ( ( term.has( '#Noun' ) && ! term.has( '#Pronoun' ) ) || term.has( '#Verb' ) || term.has( '#Value' ) || term.has( '#Adjective' ) ) {
 			let normalizedTerm = term.data().normal;
 			if ( -1 === stopWords.indexOf( normalizedTerm ) ) {
-				if ( wordData[ normalizedTerm ] ) {
-					wordData[ normalizedTerm ].count++;
+				if ( dataObject[ normalizedTerm ] ) {
+					dataObject[ normalizedTerm ].count++;
 				} else {
-					wordData[ normalizedTerm ] = {
+					dataObject[ normalizedTerm ] = {
 						count: 1,
 						normal: normalizedTerm
 					};
 				}
 			}
 		}
-	} );
+		return dataObject;
+	}, {} );
+
+	// Top tokens. Including words and three word "grams".
+	let topTokens = null,
+
+	// The number of words left to reach the summary limit.
+	remainingWords = excerptLength,
+	sentenceData = [];
 
 	// Sort words by frequency.
 	allWords.sort( function( a, b ) {
@@ -82,7 +82,7 @@ export function getTopSentences( text ) {
 	} ).map( function( gram ) { return gram.normal } ) ) ) );
 
 	// Assign a score to each sentence based on the top tokens that it contains.
-	sentences.list.forEach( function( sentence, sentenceIndex ) {
+	sentenceData = sentences.list.reduce( function( dataArray, sentence, sentenceIndex ) {
 		let data = {
 			index: sentenceIndex,
 			text: sentence.out( 'text' ).trim(),
@@ -92,16 +92,21 @@ export function getTopSentences( text ) {
 			topTokenDensity: 0,
 			score: 0,
 		};
-		topTokens.forEach( function( token ) {
-			data.topTokenCount += ( sentence.out( 'normal' ).match( token.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' ) ) || [] ).length;
-		} );
+		data.topTokenCount = topTokens.reduce( function( count, token ) {
+			return count + ( sentence.out( 'normal' ).match( token.replace( /[-\/\\^$*+?.()|[\]{}]/g, '\\$&' ) ) || [] ).length;
+		}, 0 );
 		data.topTokenDensity = ( data.topTokenCount / sentence.terms.length );
 		data.score = ( data.topTokenCount * data.topTokenDensity );
-		sentenceData.push( data );
-	} );
+		dataArray.push( data );
+		return dataArray;
+	}, [] );
 
 	// Return sentences that meet the score minimum in chronological order.
-	return sentenceData.filter( function( sentence ){ let keep = sentence.score >= scoreMinimum && remainingWords > 0; remainingWords -= keep ? sentence.wordCount : 0; return keep; } ).sort( function( a, b ) { return a.index - b.index; } );
+	return sentenceData.filter( function( sentence ){
+		let keep = sentence.score >= scoreMinimum && remainingWords > 0;
+		remainingWords -= keep ? sentence.wordCount : 0;
+		return keep;
+	} ).sort( function( a, b ) { return a.index - b.index; } );
 };
 
 /**

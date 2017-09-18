@@ -1,3 +1,4 @@
+'use strict'
 /**
  * @summary Create and manage the view of the auto summary widget.
  *

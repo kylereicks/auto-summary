@@ -1,3 +1,4 @@
+'use strict'
 /**
  * Initialize the auto summary utility as soon as the document content is available.
  *
