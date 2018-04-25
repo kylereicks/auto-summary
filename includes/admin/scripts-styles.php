@@ -29,7 +29,7 @@ function init() {
  * @since 0.1.0
  */
 function register_admin_scripts_and_styles() {
-	wp_register_script( 'auto-summary', plugins_url( 'auto-summary/assets/js/build/auto-summary.min.js' ), array(), \Auto_Summary\VERSION, true );
+	wp_register_script( 'auto-summary', plugins_url( 'assets/js/build/auto-summary.min.js', dirname( dirname( __file__ ) ) ), array(), \Auto_Summary\VERSION, true );
 
-	wp_register_style( 'auto-summary', plugins_url( 'auto-summary/assets/css/auto-summary.min.css' ), array(), \Auto_Summary\VERSION );
+	wp_register_style( 'auto-summary', plugins_url( 'assets/css/auto-summary.min.css', dirname( dirname( __file__ ) ) ), array(), \Auto_Summary\VERSION );
 }
